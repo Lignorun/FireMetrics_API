@@ -1,1 +1,34 @@
 Descrição breve do projeto.txt
+# Virtual environment
+# Ignore common virtual environment folders
+.venv/
+venv/
+env/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Generated data and log files
+*.log
+*.sqlite
+data/
+media/
+
+# Sensitive configuration files
+.env
+
+# IDE-specific directories (e.g., Visual Studio Code)
+.vscode/
+.idea/
+
+# If you are generating graphs, these folders might be created
+# Example for Matplotlib or Seaborn
+/temp_graphs/
+
+# Installation and distribution files
+dist/
+build/
+*.egg-info/
