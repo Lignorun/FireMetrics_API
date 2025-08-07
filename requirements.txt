@@ -1,0 +1,9 @@
+fastapi
+uvicorn # Para rodar o servidor da API
+python-dotenv
+requests
+pandas
+scipy
+scikit-learn
+matplotlib
+seaborn
