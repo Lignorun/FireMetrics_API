@@ -25,6 +25,43 @@ class GroupingsResponse(BaseModel):
     __root__: Dict[str, Translation]
 
 
+# model for the area data of fire 
+class AnnualData(BaseModel):
+    year: int
+    areaHa: float
+
+
+class MonthlyData(BaseModel):
+    year: int
+    month: int
+    areaHa: float
+
+
+class FireDataResponse(BaseModel):
+    local_id: str
+    annual: List[AnnualData]
+    monthly: List[MonthlyData]
+
+
+# store all teh fire data by annual and monthly, for only one local id
+_cache_store = {}  # Simple dictionary to store cache in memory
+
+def set_cache(local: str, data: dict):
+    _cache_store[local] = {
+        "local_id": local,
+        "annual": data.get("annual", []),
+        "monthly": data.get("monthly", [])
+    }
+
+def get_cache(local: str):
+    cached = _cache_store.get(local)
+    if cached and cached.get("local_id") == local:
+        # Here you can implement cache validity checks if you want
+        return cached
+    return None
+
+
+
 app = FastAPI(
     title="FireMetrics_API",
     description="API for statistical analysis of fire data in Brazil, using data from MapBiomas Fogo.",
@@ -61,21 +98,16 @@ def get_grouping_options():
     return get_grouping_options_from_mapbiomas()
 
 
-######## To be implemented ########
-@app.get("/data/annual/{local}", tags=["Data Retrieval"])
-def get_annual_data_endpoint(local: str):
-    """
-    Retrieves all annual fire data for a specific location.
-    """
-    data = get_fire_data(local=local, interval="annual")
-    return {"message": f"Annual data for {local}", "data": data}
 
 
-######## To be implemented ########
-@app.get("/data/monthly/{local}", tags=["Data Retrieval"])
-def get_monthly_data_endpoint(local: str):
-    """
-    Retrieves all monthly fire data for a specific location.
-    """
-    data = get_fire_data(local=local, interval="monthly")
-    return {"message": f"Monthly data for {local}", "data": data}
+@app.get("/data/raw/{local}", tags=["Data Retrieval"], response_model=FireDataResponse)
+def fetch_and_cache_data(local: str):
+    # local já recebido via URL
+    data = get_fire_data(local)  # Busca os dados para esse local
+    cached_data = {
+        "local_id": local,
+        "annual": data.get("annual", []),
+        "monthly": data.get("monthly", [])
+    }
+    set_cache(local, cached_data)
+    return cached_data
