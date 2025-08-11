@@ -38,6 +38,7 @@ class MonthlyData(BaseModel):
 
 
 class FireDataResponse(BaseModel):
+    local_name: str
     local_id: str
     annual: List[AnnualData]
     monthly: List[MonthlyData]
@@ -48,6 +49,7 @@ _cache_store = {}  # Simple dictionary to store cache in memory
 
 def set_cache(local: str, data: dict):
     _cache_store[local] = {
+        "local_name": data.get("local_name"),
         "local_id": local,
         "annual": data.get("annual", []),
         "monthly": data.get("monthly", [])
@@ -78,7 +80,7 @@ def read_root():
 
 
 
-@app.get("/territories/search", tags=["Territory Search"], response_model=List[Territory])
+@app.get("/territories/{search_term}", tags=["Territory Search"], response_model=List[Territory])
 def search_territories(search_term: Optional[str] = None):
     """
     Searches for a territory by name or code.
@@ -103,8 +105,13 @@ def get_grouping_options():
 @app.get("/data/raw/{local}", tags=["Data Retrieval"], response_model=FireDataResponse)
 def fetch_and_cache_data(local: str):
     # local já recebido via URL
-    data = get_fire_data(local)  # Busca os dados para esse local
+    data = get_fire_data(local) # Busca os dados para esse local
+    territories = search_territories_from_mapbiomas(local) 
+    local_name = territories[0].name if territories else "Unknown"
+    # FIM DA ALTERAÇÃO
+ 
     cached_data = {
+        "local_name": local_name,
         "local_id": local,
         "annual": data.get("annual", []),
         "monthly": data.get("monthly", [])
