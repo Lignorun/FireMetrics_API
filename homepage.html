@@ -1,131 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FireMetrics API - Fire Data Analysis in Brazil</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f8;
+            color: #333;
+            margin: 0;
+            padding: 0 2rem 3rem 2rem;
+            line-height: 1.6;
+        }
+        header {
+            background-color: #2a7f62;
+            color: white;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        header h1 {
+            margin: 0;
+            font-weight: 700;
+            font-size: 2.8rem;
+        }
+        header p {
+            margin: 0.5rem 0 0;
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        main {
+            max-width: 900px;
+            margin: 2rem auto;
+            background: white;
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        section {
+            margin-bottom: 2.5rem;
+        }
+        h2 {
+            color: #2a7f62;
+            border-bottom: 2px solid #2a7f62;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+        p, li {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+        a {
+            color: #2a7f62;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .endpoint-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        .endpoint-item {
+            background: #e6f0ec;
+            margin-bottom: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 6px;
+            box-shadow: inset 0 0 5px rgba(42, 127, 98, 0.15);
+        }
+        .endpoint-item h3 {
+            font-family: monospace;
+            color: #1a5c44;
+            font-size: 1.2rem;
+            margin: 0 0 0.5rem;
+        }
+        .endpoint-item p.description {
+            margin-top: 0.5rem;
+            color: #555;
+            font-size: 1rem;
+        }
+        .endpoint-item p.example {
+            margin-top: 1rem;
+            font-size: 0.95rem;
+            color: #666;
+        }
+        code {
+            background-color: #000000;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.95em;
+        }
+        .json-example {
+            background-color: #000000;
+            color: #ffffff; /* Cor do texto JSON */
+            border-radius: 4px;
+            padding: 1rem;
+            overflow-x: auto;
+            white-space: pre; /* Mantém a formatação do JSON */
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+        }
+        footer {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #777;
+            margin-top: 4rem;
+            border-top: 1px solid #ddd;
+            padding-top: 1.5rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🌱 FireMetrics API</h1>
+        <p>Statistical analysis of fire data in Brazil, based on MapBiomas Fogo.</p>
+    </header>
 
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <title>FireMetrics API</title>
-        <style>
-            body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background-color: #f4f7f8;
-                color: #333;
-                margin: 0;
-                padding: 0 2rem 3rem 2rem;
-                line-height: 1.6;
-            }
-            header {
-                background-color: #2a7f62;
-                color: white;
-                padding: 1.5rem 2rem;
-                text-align: center;
-                box-shadow: 0 2px 4px rgb(0 0 0 / 0.1);
-            }
-            header h1 {
-                margin: 0;
-                font-weight: 700;
-                font-size: 2.4rem;
-            }
-            main {
-                max-width: 900px;
-                margin: 2rem auto;
-                background: white;
-                padding: 2rem 3rem;
-                border-radius: 8px;
-                box-shadow: 0 4px 12px rgb(0 0 0 / 0.1);
-            }
-            section {
-                margin-bottom: 2.5rem;
-            }
-            h2 {
-                color: #2a7f62;
-                border-bottom: 2px solid #2a7f62;
-                padding-bottom: 0.3rem;
-                margin-bottom: 1rem;
-            }
-            p, li {
-                font-size: 1.1rem;
-            }
-            a {
-                color: #2a7f62;
-                text-decoration: none;
-                font-weight: 600;
-            }
-            a:hover {
-                text-decoration: underline;
-            }
-            .note {
-                font-size: 0.95rem;
-                color: #555;
-                font-style: italic;
-                margin-top: 0.4rem;
-            }
-            ul.routes {
-                list-style-type: none;
-                padding-left: 0;
-            }
-            ul.routes li {
-                background: #e6f0ec;
-                margin-bottom: 0.8rem;
-                padding: 0.9rem 1.2rem;
-                border-radius: 6px;
-                font-family: monospace;
-                box-shadow: inset 0 0 5px rgba(42,127,98,0.15);
-            }
-            footer {
-                text-align: center;
-                font-size: 0.9rem;
-                color: #777;
-                margin-top: 4rem;
-                border-top: 1px solid #ddd;
-                padding-top: 1rem;
-            }
-        </style>
-    </head>
-    <body>
-        <header>
-            <h1>🌱 FireMetrics API</h1>
-        </header>
+    <main>
+        <section>
+            <h2>About the API</h2>
+            <p>
+                The **FireMetrics API** was developed to provide statistical analysis of fire data in Brazil, using the historical data series from **MapBiomas Fogo**. Our API allows searching for territories, getting grouping types, and accessing processed burned area data, both annual and monthly.
+            </p>
+        </section>
 
-        <main>
-            <section>
-                <h2>About This API</h2>
-                <p>
-                    FireMetrics API provides statistical analysis on fire data in Brazil using MapBiomas Fogo datasets.
-                    It enables territory searching, grouping retrieval, and access to raw and processed fire data (annual and monthly).
-                </p>
-            </section>
+        <section>
+            <h2>Available Endpoints</h2>
+            <p>Here is a list of the available endpoints and how to use them:</p>
+            <ul class="endpoint-list">
+                <li class="endpoint-item">
+                    <h3>GET /territories/{search_term}</h3>
+                    <p class="description">Searches for territories (municipalities, states, biomes, etc.) by name or code.</p>
+                    <p class="example">Example: <code>/territories/Amazon</code></p>
+                    <div class="json-example">
+                        <pre><code>[
+  {
+    "name": "Amazônia",
+    "code": "1",
+    "type": "biome",
+    "uf": null
+  },
+  {
+    "name": "Amazonas",
+    "code": "13",
+    "type": "state",
+    "uf": "AM"
+  }
+]</code></pre>
+                    </div>
+                </li>
+                <li class="endpoint-item">
+                    <h3>GET /territories/groupings</h3>
+                    <p class="description">Returns the available territory grouping types, including their translations.</p>
+                    <div class="json-example">
+                        <pre><code>{
+  "city": {
+    "pt": "Município",
+    "es": "Ciudad",
+    "en": "City"
+  },
+  "state": {
+    "pt": "Estado",
+    "es": "Estado",
+    "en": "State"
+  },
+  "region": {
+    "pt": "Região",
+    "es": "Región",
+    "en": "Region"
+  },
+  "biome": {
+    "pt": "Bioma",
+    "es": "Bioma",
+    "en": "Biome"
+  },
+  "geopark": {
+    "pt": "Geoparque",
+    "es": "Geoparque",
+    "en": "Geopark"
+  },
+  "biosphereReserve": {
+    "pt": "Reserva da Biosfera",
+    "es": "Reserva de Biosfera",
+    "en": "Biosphere Reserve"
+  },
+  "ugrh": {
+    "pt": "Unidade de Gestão de Recursos Hídricos",
+    "es": "Unidad de Gestión de Recursos Hídricos",
+    "en": "Water Resources Management Unit"
+  },
+  "macrohr": {
+    "pt": "Macro Região Hidrográfica",
+    "es": "Macroregión Hidrográfica",
+    "en": "Macro Hydrographic Region"
+  },
+  "mesohr": {
+    "pt": "Meso Região Hidrográfica",
+    "es": "Mesorregión Hidrográfica",
+    "en": "Meso Hydrographic Region"
+  },
+  "microhr": {
+    "pt": "Micro Região Hidrográfica",
+    "es": "Microrregión Hidrográfica",
+    "en": "Micro Hydrographic Region"
+  },
+  "uc": {
+    "pt": "Unidade de Conservação",
+    "es": "Unidad de Conservación",
+    "en": "Conservation Unit"
+  },
+  "indigenousLand": {
+    "pt": "Terra Indígena",
+    "es": "Tierra Indigena",
+    "en": "Indigenous Land"
+  },
+  "legalAmazon": {
+    "pt": "Amazônia Legal",
+    "es": "Amazonía Legal",
+    "en": "Legal Amazon"
+  },
+  "matopiba": {
+    "pt": "Matopiba",
+    "es": "Matopiba",
+    "en": "Matopiba"
+  },
+  "quilombo": {
+    "pt": "Quilombo",
+    "es": "Quilombo",
+    "en": "Quilombo"
+  },
+  "amacro": {
+    "pt": "AMACRO",
+    "es": "AMACRO",
+    "en": "AMACRO"
+  },
+  "atlanticForestLaw": {
+    "pt": "Lei da Mata Atlântica",
+    "es": "Ley del Bosque Atlántico",
+    "en": "Atlantic Forest Law"
+  }
+}</code></pre>
+                    </div>
+                </li>
+                <li class="endpoint-item">
+                    <h3>GET /data/raw/{local_id}</h3>
+                    <p class="description">Fetches and caches the raw fire data for a specific territory, identified by <code>local_id</code>.</p>
+                    <p class="example">Example: <code>/data/raw/5103403</code></p>
+                    <div class="json-example">
+                        <pre><code>{
+  "local_id": "5103403",
+  "annual": [
+    { "year": 1985, "areaHa": 12345.67 },
+    { "year": 1986, "areaHa": 9876.54 }
+  ],
+  "monthly": [
+    { "year": 1985, "month": 1, "areaHa": 100.5 },
+    { "year": 1985, "month": 2, "areaHa": 200.75 }
+  ]
+}</code></pre>
+                    </div>
+                </li>
+                <li class="endpoint-item">
+                    <h3>GET /data/annual/{local_id}</h3>
+                    <p class="description">Returns the annual burned area data for a territory.</p>
+                    <p class="example">Example: <code>/data/annual/5103403</code></p>
+                    <div class="json-example">
+                        <pre><code>{
+  "local_id": "5103403",
+  "annual": [
+    { "year": 1985, "areaHa": 12345.67 },
+    { "year": 1986, "areaHa": 9876.54 }
+  ]
+}</code></pre>
+                    </div>
+                </li>
+                <li class="endpoint-item">
+                    <h3>GET /data/monthly/{local_id}</h3>
+                    <p class="description">Returns the monthly burned area data for a territory.</p>
+                    <p class="example">Example: <code>/data/monthly/5103403</code></p>
+                    <div class="json-example">
+                        <pre><code>{
+  "local_id": "5103403",
+  "monthly": [
+    { "year": 1985, "month": 1, "areaHa": 100.5 },
+    { "year": 1985, "month": 2, "areaHa": 200.75 }
+  ]
+}</code></pre>
+                    </div>
+                </li>
+                <li class="endpoint-item">
+                    <h3>GET /docs</h3>
+                    <p class="description">Access the interactive API documentation, generated by Swagger UI.</p>
+                </li>
+            </ul>
+        </section>
 
-            <section>
-                <h2>Available Endpoints</h2>
-                <ul class="routes">
-                    <li><a href="/territories/search?search_term=Amazon">GET /territories/search?search_term=&lt;term&gt;</a> — Search territories by name or code</li>
-                    <li><a href="/territories/groupings">GET /territories/groupings</a> — Retrieve territory grouping types with translations</li>
-                    <li><a href="/data/raw/12345">GET /data/raw/{local}</a> — Fetch and cache raw fire data for a specific location (replace {local} with location id)</li>
-                    <li><a href="/data/annual/12345">GET /data/annual/{local}</a> — Get annual fire data for a location</li>
-                    <li><a href="/data/monthly/12345">GET /data/monthly/{local}</a> — Get monthly fire data for a location</li>
-                    <li><a href="/docs">GET /docs</a> — Interactive API documentation (Swagger UI)</li>
-                </ul>
-            </section>
+        <section>
+            <h2>How to Use</h2>
+            <p>
+                To get burned area data, the ideal process is:
+            </p>
+            <ol>
+                <li>Use the <code>/territories/{search_term}</code> endpoint to find the **<code>local_id</code>** of the desired territory.</li>
+                <li>Make the first call to the <code>/data/raw/{local_id}</code> endpoint. This will fetch the data from MapBiomas and **cache it**.</li>
+                <li>Then, call the <code>/data/annual/{local_id}</code> or <code>/data/monthly/{local_id}</code> endpoints to access the processed data instantly, using the cache.</li>
+            </ol>
+            <p>
+                This caching approach ensures that after the first request, subsequent analyses are much faster.
+            </p>
+        </section>
 
-            <section>
-                <h2>Usage Notes</h2>
-                <p>
-                    The <code>/data/raw/{local}</code> endpoint fetches and caches the raw fire data for the specified location.
-                    Subsequent requests to <code>/data/annual/{local}</code> or <code>/data/monthly/{local}</code> serve data from the cache to improve performance.
-                </p>
-            </section>
+        <section>
+            <h2>Project & Source Code</h2>
+            <p>
+                Explore the full source code and contribute to the project on 
+                <a href="https://github.com/Lignorun/FireMetrics_API" target="_blank" rel="noopener noreferrer">GitHub</a>.
+            </p>
+        </section>
+    </main>
 
-            <section>
-                <h2>Project &amp; Source Code</h2>
-                <p>
-                    Explore the full source code and contribute on 
-                    <a href="https://github.com/YourGitHubUsername/FireMetrics_API" target="_blank" rel="noopener noreferrer">GitHub</a>.
-                </p>
-            </section>
-        </main>
-
-        <footer>
-            &copy; 2025 Diego Lins &mdash; FireMetrics API
-        </footer>
-    </body>
-    </html>
-   
+    <footer>
+        &copy; 2025 Diego Lins &mdash; FireMetrics API
+    </footer>
+</body>
+</html>
