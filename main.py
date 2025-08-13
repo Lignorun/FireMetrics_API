@@ -4,6 +4,7 @@ from pydantic import BaseModel, RootModel
 from typing import List, Union, Optional, Dict
 from services.territory_search import search_territories_from_mapbiomas, get_grouping_options_from_mapbiomas
 from services.fire_data import get_fire_data
+from datetime import date, timedelta
 
 # Model for the /territories/search endpoint
 class Territory(BaseModel):
@@ -42,21 +43,23 @@ class FireDataResponse(BaseModel):
     monthly: List[MonthlyData]
 
 # Store all fire data by annual and monthly, for a single local ID
-_cache_store = {}  # Simple dictionary to store cache in memory
+_cache_store = {}
 
 def set_cache(local: str, data: dict):
     _cache_store[local] = {
         "local_name": data.get("local_name"),
         "local_id": local,
         "annual": data.get("annual", []),
-        "monthly": data.get("monthly", [])
+        "monthly": data.get("monthly", []),
+        "last_updated": date.today()  # Apenas data
     }
 
-def get_cache(local: str):
+def get_cache(local: str, max_age_days=30):
     cached = _cache_store.get(local)
     if cached and cached.get("local_id") == local:
-        # Optional: Implement cache validity checks here
-        return cached
+        last_updated = cached["last_updated"]
+        if isinstance(last_updated, date) and (date.today() - last_updated) < timedelta(days=max_age_days):
+            return cached
     return None
 
 app = FastAPI(
@@ -100,15 +103,19 @@ def fetch_and_cache_data(local: str):
     Fetches and caches the raw fire data for a specific territory.
     Returns the processed data.
     """
+    cached_data = get_cache(local)
+    if cached_data:
+        return cached_data
+
     data = get_fire_data(local)  # Fetch data for this location
-    territories = search_territories_from_mapbiomas(local) 
+    territories = search_territories_from_mapbiomas(local)
     local_name = territories[0].name if territories else "Unknown"
     
     cached_data = {
         "local_name": local_name,
         "local_id": local,
         "annual": data.get("annual", []),
-        "monthly": data.get("monthly", [])
+        "monthly": data.get("monthly", []),
     }
     set_cache(local, cached_data)
     return cached_data
