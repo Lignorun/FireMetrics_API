@@ -1,47 +1,36 @@
-import requests
-from typing import List, Dict, Any, Optional
-from fastapi import HTTPException, status
+from typing import List
+from .api_HTTPException import fetch_external_api_data 
+from data.pydantic_models import Territory, GroupingsResponse
 
-# URL base da API externa do MapBiomas Fogo
+# external URL used to acces the MapBioma Fire info
 MAPBIOMAS_API_URL = "https://fogo.geodatin.com/api"
 
-def get_grouping_options_from_mapbiomas() -> Dict[str, Dict[str, str]]:
-    """
-    Returns the original JSON from the MapBiomas Fire API with the territory grouping options.
-    No user data is sent.
-    """
-    url = f"{MAPBIOMAS_API_URL}/territories/country/1/groupings"
 
-    try:
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-        return response.json()
-    
-    except requests.RequestException as e:
-        # If it's an HTTP error, get the status_code; otherwise, use 502
-        status_code = getattr(e.response, "status_code", 502)
-        raise HTTPException(status_code=status_code, detail=str(e))
 
-def search_territories_from_mapbiomas(search_term: str) -> List[Dict[str, Any]]:
+def get_grouping_subdivisions_from_mapbiomas(local_type: str, local_code: str) -> GroupingsResponse:
     """
-    Searches for a territory in the MapBiomas Fire API by name or code.
+    Retrieves a list of subdivisions (e.g., states for a country, municipalities for a state)
+    for a given territory from the MapBiomas API.
+    """
+    url = f"{MAPBIOMAS_API_URL}/territories/{local_type}/{local_code}/groupings"
+    response_data = fetch_external_api_data(url)
+    return response_data
+
+
+def search_territories_from_mapbiomas(search_term: str) ->  List[Territory]:
+    """
+    Searches for a territory in the MapBiomas Fogo API by name or code.
     
     Args:
         search_term: The search term (territory name or code).
 
     Returns:
-        A list of dictionaries representing the territories found.
+    A list of dictionaries representing the territories found.
     """
     clean_search_term = search_term.strip()
+    if not search_term: clean_search_term = "Rio de Janeiro"
     url = f"{MAPBIOMAS_API_URL}/territories/search/{clean_search_term}"
+    data = fetch_external_api_data(url)
 
-    try:
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()
-
-        # The API response is already a list of territories and can be returned directly.
-        return response.json()
-    except requests.RequestException as e:
-        # If it's an HTTP error, get the status_code; otherwise, use 502
-        status_code = getattr(e.response, "status_code", 502)
-        raise HTTPException(status_code=status_code, detail=str(e))
+    # The API response is already a list of territories and can be returned directly.
+    return data
