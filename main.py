@@ -1,66 +1,17 @@
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
-from pydantic import BaseModel, RootModel
-from typing import List, Union, Optional, Dict
-from services.territory_search import search_territories_from_mapbiomas, get_grouping_options_from_mapbiomas
-from services.fire_data import get_fire_data
-from datetime import date, timedelta
-
-# Model for the /territories/search endpoint
-class Territory(BaseModel):
-    """
-    Model to represent a territory returned by the search.
-    """
-    name: str
-    code: Union[int, str]
-    type: str
-    uf: Optional[str] = None
-
-# --- MODELS FOR THE GROUPINGS ENDPOINT ---
-class Translation(BaseModel):
-    pt: str
-    es: str
-    en: str
-
-class GroupingsResponse(RootModel[Dict[str, Translation]]):
-    pass
-# --------------------------------------------------------
-
-# Model for the fire area data
-class AnnualData(BaseModel):
-    year: int
-    areaHa: float
-
-class MonthlyData(BaseModel):
-    year: int
-    month: int
-    areaHa: float
-
-class FireDataResponse(BaseModel):
-    local_name: str
-    local_id: str
-    annual: List[AnnualData]
-    monthly: List[MonthlyData]
-
-# Store all fire data by annual and monthly, for a single local ID
-_cache_store = {}
-
-def set_cache(local: str, data: dict):
-    _cache_store[local] = {
-        "local_name": data.get("local_name"),
-        "local_id": local,
-        "annual": data.get("annual", []),
-        "monthly": data.get("monthly", []),
-        "last_updated": date.today()  # Apenas data
-    }
-
-def get_cache(local: str, max_age_days=30):
-    cached = _cache_store.get(local)
-    if cached and cached.get("local_id") == local:
-        last_updated = cached["last_updated"]
-        if isinstance(last_updated, date) and (date.today() - last_updated) < timedelta(days=max_age_days):
-            return cached
-    return None
+from typing import List,  Optional
+# Import models
+from data.pydantic_models import (
+    Territory,
+    GroupingsResponse,
+    FireDataResponse,
+)
+#import functions
+from services.territory_search import (
+    search_territories_from_mapbiomas, 
+    get_grouping_subdivisions_from_mapbiomas)
+from services.fire_data import get_fire_data_with_cache
 
 app = FastAPI(
     title="FireMetrics_API",
@@ -76,17 +27,6 @@ def read_root():
     """
     return FileResponse("homepage.html")
 
-# This specific endpoint must come before the generic endpoint with `{search_term}`
-@app.get("/territories/ibge/groupings", tags=["Territory Search"], response_model=GroupingsResponse)
-def get_grouping_options():
-    """
-    Retrieves the list of possible territory grouping types.
-
-    This function returns the original JSON from the external MapBiomas API,
-    containing all translations ('pt', 'es', 'en').
-    """
-    data_from_service = get_grouping_options_from_mapbiomas()
-    return data_from_service
 
 @app.get("/territories/{search_term}", tags=["Territory Search"], response_model=List[Territory])
 def search_territories(search_term: Optional[str] = None):
@@ -96,26 +36,22 @@ def search_territories(search_term: Optional[str] = None):
     """
     return search_territories_from_mapbiomas(search_term)
 
-
-@app.get("/data/raw/{local}", tags=["Data Retrieval"], response_model=FireDataResponse)
-def fetch_and_cache_data(local: str):
+# This specific endpoint must come before the generic endpoint with `{search_term}`
+@app.get("/territories/ibge/groupings/{local_type}/{local_code}", tags=["Territory Search"], response_model=GroupingsResponse)
+def get_grouping_options(local_type: str, local_code: str):
     """
-    Fetches and caches the raw fire data for a specific territory.
-    Returns the processed data.
+    Retrieves the list of possible territory grouping types.
+    This function returns the original JSON from the external MapBiomas API,
+    containing all translations ('pt', 'es', 'en').
     """
-    cached_data = get_cache(local)
-    if cached_data:
-        return cached_data
+    data_from_service = get_grouping_subdivisions_from_mapbiomas(local_type, local_code)
+    return data_from_service
 
-    data = get_fire_data(local)  # Fetch data for this location
-    territories = search_territories_from_mapbiomas(local)
-    local_name = territories[0].name if territories else "Unknown"
-    
-    cached_data = {
-        "local_name": local_name,
-        "local_id": local,
-        "annual": data.get("annual", []),
-        "monthly": data.get("monthly", []),
-    }
-    set_cache(local, cached_data)
-    return cached_data
+
+@app.get("/data/raw/{local_type}/{local_code}/{grouping}", tags=["Data Retrieval"], response_model=FireDataResponse)
+def fetch_and_cache_data(local_type: str, local_code: str, grouping: str):
+    """
+    Fetches and caches the raw fire data for a specific territory based on type, code, and grouping.
+    All data fetching, caching, and error handling are managed by a dedicated service function.
+    """
+    return get_fire_data_with_cache(local_type, local_code, grouping)
