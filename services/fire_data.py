@@ -1,40 +1,50 @@
-from data.cache_manager import get_cache, set_cache
-from data.pydantic_models import FireDataResponse
-from services.territory_search import search_territories_from_mapbiomas, fetch_external_api_data # Assumindo que a fetch_external_api_data está aqui
+# services/fire_data.py
+from data.cache_manager import (
+    get_raw_data_from_cache,
+    set_raw_data_to_cache,
+    show_all_data,
+)
+from data.pydantic_models import RawFireData, CachedData
+from services.territory_search import search_territories_from_mapbiomas
+from services.api_HTTPException import fetch_external_api_data  # import corrigido
 
-# URL da API externa para dados de fogo
+# External API base URL for fire data
 FIRE_DATA_API_URL = "https://fogo.geodatin.com/api/statistics/time-series/"
 
-def get_fire_data_with_cache(local_type: str, local_code: str, grouping: str) -> FireDataResponse:
+
+def get_raw_fire_data_with_cache(local_type: str, local_code: str, grouping: str) -> RawFireData:
     """
-    Orchestrates the fetching of fire data for a territory.
-    It checks the cache first, and if not found, fetches from the external API,
-    caches the result, and returns the data.
+    Fetches fire data for a territory, using cache when available.
+
+    Steps:
+    1. Tries to load from cache.
+    2. If not cached, fetches from the external API.
+    3. Retrieves the local name for enrichment.
+    4. Caches the processed data.
+    5. Returns the result as a validated Pydantic model.
+
+    Args:
+        local_type: Type of the territory (e.g., "state", "municipality").
+        local_code: Unique code of the territory.
+        grouping: Grouping option for aggregation (e.g., "biome").
+
+    Returns:
+        RawFireData: Validated fire data for the requested territory.
     """
-    # 1. Tenta obter os dados do cache
-    cached_data = get_cache(local_type, local_code, grouping)
+    # 1. Try cache
+    cached_data = get_raw_data_from_cache(local_type, local_code, grouping)
     if cached_data:
-        # get_cache já retorna a instância Pydantic, então podemos retorná-la diretamente.
         return cached_data
 
-    # 2. Constrói a URL para a API externa de dados de fogo
+    # 2. Fetch from API
     api_url = f"{FIRE_DATA_API_URL}{local_type}/{local_code}/{grouping}?monthStart=1&monthEnd=12"
-
-    # 3. Busca os dados da API externa usando sua função robusta
     data = fetch_external_api_data(api_url)
 
-    # 4. Busca o nome do local para enriquecer os dados.
-    # Esta é a parte que você pode refatorar para ser mais eficiente, se possível.
-    # Por enquanto, mantemos a busca por termo para compatibilidade.
+    # 3. Enrich with local name
     territories = search_territories_from_mapbiomas(local_code)
-    local_name = "Nome Desconhecido"
-    for t in territories:
-    # Acesso as chaves do dicionário 't' para encontrar o tipo
-        if t['type'] == local_type:
-            local_name = t['name']
-            break
-    
-    # 5. Prepara os dados para o cache e Pydantic
+    local_name = next((t.name for t in territories if t.type == local_type), "unknoing")
+
+    # 4. Prepare processed data
     processed_data = {
         "local_name": local_name,
         "local_id": local_code,
@@ -44,10 +54,23 @@ def get_fire_data_with_cache(local_type: str, local_code: str, grouping: str) ->
         "monthly": data.get("monthly", []),
     }
 
-    # 6. Armazena os dados no cache
-    # Assumindo que `set_cache` está esperando os parâmetros em ordem.
-    set_cache(local_type, local_code, grouping, processed_data)
+    # 5. Cache the data
+    set_raw_data_to_cache(local_type, local_code, grouping, processed_data)
 
-    # 7. Retorna a resposta no formato do Pydantic
-    # Converte o dicionário `processed_data` para o modelo `FireDataResponse`.
-    return FireDataResponse(**processed_data)
+    # 6. Return as Pydantic model
+    return RawFireData(**processed_data)
+
+
+def get_all_fire_data_from_cache(local_type: str, local_code: str, grouping: str) -> CachedData:
+    """
+    Returns all fire data stored in the cache, including raw data and statistics.
+
+    Args:
+        local_type: Type of the territory.
+        local_code: Code of the territory.
+        grouping: Grouping option.
+
+    Returns:
+        CachedData: The cached data object.
+    """
+    return show_all_data(local_type, local_code, grouping)
