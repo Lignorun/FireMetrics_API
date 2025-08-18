@@ -14,7 +14,6 @@ __pycache__/
 # Generated data and log files
 *.log
 *.sqlite
-data/
 media/
 
 # Sensitive configuration files
