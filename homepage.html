@@ -96,14 +96,18 @@
         }
         .json-example {
             background-color: #000000;
-            color: #ffffff; /* Cor do texto JSON */
+            color: #ffffff;
             border-radius: 4px;
-            padding: 1rem;
+            padding: 0.5rem 1rem; /* Espaçamento interno */
+            margin: 0.5rem 0; /* Espaçamento externo para uma única linha */
             overflow-x: auto;
-            white-space: pre; /* Mantém a formatação do JSON */
+            white-space: pre;
             font-family: 'Courier New', Courier, monospace;
             font-size: 0.9rem;
-            margin-top: 1rem;
+        }
+        .json-example pre {
+            margin: 0;
+            padding: 0;
         }
         footer {
             text-align: center;
@@ -125,7 +129,7 @@
         <section>
             <h2>About the API</h2>
             <p>
-                The **FireMetrics API** was developed to provide statistical analysis of fire data in Brazil, using the historical data series from **MapBiomas Fogo**. Our API allows searching for territories, getting grouping types, and accessing processed burned area data, both annual and monthly.
+                The <strong>FireMetrics API</strong> was developed to provide statistical analysis of fire data in Brazil, using the historical data series from <strong>MapBiomas Fogo</strong>. Our API allows searching for territories, getting grouping types, and accessing processed burned area data, both annual and monthly.
             </p>
         </section>
 
@@ -134,28 +138,52 @@
             <p>Here is a list of the available endpoints and how to use them:</p>
             <ul class="endpoint-list">
                 <li class="endpoint-item">
-                    <h3>GET /territories/{search_term}</h3>
+                    <h3><a href="/territories/Amazonia">GET /territories/{search_term}</a></h3>
                     <p class="description">Searches for territories (municipalities, states, biomes, etc.) by name or code.</p>
-                    <p class="example">Example: <code>/territories/Amazon</code></p>
+                    <p class="example">Example: /territories/Amazonia</p>
                     <div class="json-example">
                         <pre><code>[
   {
     "name": "Amazônia",
-    "code": "1",
+    "code": 1,
     "type": "biome",
     "uf": null
   },
   {
-    "name": "Amazonas",
-    "code": "13",
-    "type": "state",
-    "uf": "AM"
+    "name": "Amazônia Central",
+    "code": 2,
+    "type": "biosphereReserve",
+    "uf": null
+  },
+  {
+    "name": "Amazônia Legal",
+    "code": 1,
+    "type": "legalAmazon",
+    "uf": null
+  },
+  {
+    "name": "PARQUE NACIONAL DA AMAZÔNIA (0000.00.0136)",
+    "code": 791,
+    "type": "uc",
+    "uf": null
+  },
+  {
+    "name": "REFÚGIO DE VIDA SILVESTRE METRÓPOLE DA AMAZÔNIA (0000.15.1881)",
+    "code": 1325,
+    "type": "uc",
+    "uf": null
+  },
+  {
+    "name": "RESERVA PARTICULAR DO PATRIMÔNIO NATURAL RESERVA ECOLÓGICA VERDE AMAZÔNIA (0000.00.1230)",
+    "code": 2588,
+    "type": "uc",
+    "uf": null
   }
 ]</code></pre>
                     </div>
                 </li>
                 <li class="endpoint-item">
-                    <h3>GET /territories/groupings</h3>
+                    <h3><a href="/territories/ibge/groupings/region/1">GET /territories/ibge/groupings</a></h3>
                     <p class="description">Returns the available territory grouping types, including their translations.</p>
                     <div class="json-example">
                         <pre><code>{
@@ -168,89 +196,14 @@
     "pt": "Estado",
     "es": "Estado",
     "en": "State"
-  },
-  "region": {
-    "pt": "Região",
-    "es": "Región",
-    "en": "Region"
-  },
-  "biome": {
-    "pt": "Bioma",
-    "es": "Bioma",
-    "en": "Biome"
-  },
-  "geopark": {
-    "pt": "Geoparque",
-    "es": "Geoparque",
-    "en": "Geopark"
-  },
-  "biosphereReserve": {
-    "pt": "Reserva da Biosfera",
-    "es": "Reserva de Biosfera",
-    "en": "Biosphere Reserve"
-  },
-  "ugrh": {
-    "pt": "Unidade de Gestão de Recursos Hídricos",
-    "es": "Unidad de Gestión de Recursos Hídricos",
-    "en": "Water Resources Management Unit"
-  },
-  "macrohr": {
-    "pt": "Macro Região Hidrográfica",
-    "es": "Macroregión Hidrográfica",
-    "en": "Macro Hydrographic Region"
-  },
-  "mesohr": {
-    "pt": "Meso Região Hidrográfica",
-    "es": "Mesorregión Hidrográfica",
-    "en": "Meso Hydrographic Region"
-  },
-  "microhr": {
-    "pt": "Micro Região Hidrográfica",
-    "es": "Microrregión Hidrográfica",
-    "en": "Micro Hydrographic Region"
-  },
-  "uc": {
-    "pt": "Unidade de Conservação",
-    "es": "Unidad de Conservación",
-    "en": "Conservation Unit"
-  },
-  "indigenousLand": {
-    "pt": "Terra Indígena",
-    "es": "Tierra Indigena",
-    "en": "Indigenous Land"
-  },
-  "legalAmazon": {
-    "pt": "Amazônia Legal",
-    "es": "Amazonía Legal",
-    "en": "Legal Amazon"
-  },
-  "matopiba": {
-    "pt": "Matopiba",
-    "es": "Matopiba",
-    "en": "Matopiba"
-  },
-  "quilombo": {
-    "pt": "Quilombo",
-    "es": "Quilombo",
-    "en": "Quilombo"
-  },
-  "amacro": {
-    "pt": "AMACRO",
-    "es": "AMACRO",
-    "en": "AMACRO"
-  },
-  "atlanticForestLaw": {
-    "pt": "Lei da Mata Atlântica",
-    "es": "Ley del Bosque Atlántico",
-    "en": "Atlantic Forest Law"
   }
 }</code></pre>
                     </div>
                 </li>
                 <li class="endpoint-item">
-                    <h3>GET /data/raw/{local_id}</h3>
-                    <p class="description">Fetches and caches the raw fire data for a specific territory, identified by <code>local_id</code>.</p>
-                    <p class="example">Example: <code>/data/raw/5103403</code></p>
+                    <h3><a href="data/raw/legalAmazon/1/legalAmazon">GET /data/raw/{local_type}/{local_code}/{grouping}</a></h3>
+                    <p class="description">Fetches and caches the raw fire data for a specific territory, identified by local_id.</p>
+                    <p class="example">Example: data/raw/legalAmazon/1/legalAmazon</p>
                     <div class="json-example">
                         <pre><code>{
   "local_id": "5103403",
@@ -266,9 +219,9 @@
                     </div>
                 </li>
                 <li class="endpoint-item">
-                    <h3>GET /data/annual/{local_id}</h3>
+                    <h3><a href="/data/annual/{local_id}">GET /data/annual/{local_id}</a></h3>
                     <p class="description">Returns the annual burned area data for a territory.</p>
-                    <p class="example">Example: <code>/data/annual/5103403</code></p>
+                    <p class="example">Example:/data/annual/5103403</p>
                     <div class="json-example">
                         <pre><code>{
   "local_id": "5103403",
@@ -280,9 +233,9 @@
                     </div>
                 </li>
                 <li class="endpoint-item">
-                    <h3>GET /data/monthly/{local_id}</h3>
+                    <h3><a href="/data/monthly/{local_id}">GET /data/monthly/{local_id}</a></h3>
                     <p class="description">Returns the monthly burned area data for a territory.</p>
-                    <p class="example">Example: <code>/data/monthly/5103403</code></p>
+                    <p class="example">Example:/data/monthly/5103403</p>
                     <div class="json-example">
                         <pre><code>{
   "local_id": "5103403",
@@ -294,7 +247,7 @@
                     </div>
                 </li>
                 <li class="endpoint-item">
-                    <h3>GET /docs</h3>
+                    <h3><a href="/docs">GET /docs</a></h3>
                     <p class="description">Access the interactive API documentation, generated by Swagger UI.</p>
                 </li>
             </ul>
@@ -302,23 +255,18 @@
 
         <section>
             <h2>How to Use</h2>
-            <p>
-                To get burned area data, the ideal process is:
-            </p>
+            <p>To get burned area data, the ideal process is:</p>
             <ol>
-                <li>Use the <code>/territories/{search_term}</code> endpoint to find the **<code>local_id</code>** of the desired territory.</li>
-                <li>Make the first call to the <code>/data/raw/{local_id}</code> endpoint. This will fetch the data from MapBiomas and **cache it**.</li>
-                <li>Then, call the <code>/data/annual/{local_id}</code> or <code>/data/monthly/{local_id}</code> endpoints to access the processed data instantly, using the cache.</li>
+                <li>Use the /territories/{search_term} endpoint to find the <strong>local_id</strong> of the desired territory.</li>
+                <li>Make the first call to the /data/raw/{local_id} endpoint. This will fetch the data from MapBiomas and <strong>cache it</strong>.</li>
+                <li>Then, call the /data/annual/{local_id} or /data/monthly/{local_id} endpoints to access the processed data instantly, using the cache.</li>
             </ol>
-            <p>
-                This caching approach ensures that after the first request, subsequent analyses are much faster.
-            </p>
+            <p>This caching approach ensures that after the first request, subsequent analyses are much faster.</p>
         </section>
 
         <section>
             <h2>Project & Source Code</h2>
-            <p>
-                Explore the full source code and contribute to the project on 
+            <p>Explore the full source code and contribute to the project on 
                 <a href="https://github.com/Lignorun/FireMetrics_API" target="_blank" rel="noopener noreferrer">GitHub</a>.
             </p>
         </section>
