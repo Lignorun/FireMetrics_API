@@ -125,6 +125,8 @@ class MonthlyStatistics(BaseModel):
     Estatísticas calculadas a partir dos dados mensais.
     """
     basic: Optional[BasicSummaryStats] = None
+    descriptive: Optional[DescriptiveStats] = None
+    time_series: Optional[TimeSeriesStats] = None
 
 
 class Statistics(BaseModel):
