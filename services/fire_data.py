@@ -9,7 +9,7 @@ from services.territory_search import search_territories_from_mapbiomas
 from services.api_HTTPException import fetch_external_api_data  # import corrigido
 
 # External API base URL for fire data
-FIRE_DATA_API_URL = "https://fogo.geodatin.com/api/statistics/time-series/"
+FIRE_DATA_API_URL = "https://plataforma.monitorfogo.mapbiomas.org/api/statistics/time-series/"
 
 
 def get_raw_fire_data_with_cache(local_type: str, local_code: str, grouping: str) -> RawFireData:
