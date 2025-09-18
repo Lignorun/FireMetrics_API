@@ -73,4 +73,8 @@ def get_all_fire_data_from_cache(local_type: str, local_code: str, grouping: str
     Returns:
         CachedData: The cached data object.
     """
-    return show_all_data(local_type, local_code, grouping)
+
+    cached_data = show_all_data(local_type, local_code, grouping)
+    if cached_data:
+        return cached_data
+    return None
