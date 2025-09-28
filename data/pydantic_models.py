@@ -1,4 +1,5 @@
 # data/pydantic_models.py
+
 from pydantic import BaseModel, RootModel
 from typing import List, Optional, Dict
 from datetime import date
@@ -45,10 +46,10 @@ class MonthlyData(BaseModel):
     """
     Model for monthly fire data, used in your API's response.
     """
-    year: int
+    year: int 
     month: int
     areaHa: float
-
+ 
 class RawFireData(BaseModel):
     """
     Model for the response of your API's data endpoint.
