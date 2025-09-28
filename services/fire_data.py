@@ -1,4 +1,5 @@
 # services/fire_data.py
+
 from data.cache_manager import (
     get_raw_data_from_cache,
     set_raw_data_to_cache,
@@ -12,7 +13,7 @@ from services.api_HTTPException import fetch_external_api_data  # import corrigi
 FIRE_DATA_API_URL = "https://plataforma.monitorfogo.mapbiomas.org/api/statistics/time-series/"
 
 
-def get_raw_fire_data_with_cache(local_type: str, local_code: str, grouping: str) -> RawFireData:
+def get_raw_fire_data_of_cache(local_type: str, local_code: str, grouping: str) -> RawFireData:
     """
     Fetches fire data for a territory, using cache when available.
 

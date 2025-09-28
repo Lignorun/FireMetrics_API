@@ -15,9 +15,12 @@ from services.territory_search import (
     get_grouping_subdivisions_from_mapbiomas,
 )
 from services.fire_data import (
-    get_raw_fire_data_with_cache,
-    get_all_fire_data_from_cache,
+    get_raw_fire_data_of_cache,
+    get_all_fire_data_from_cache
 )
+
+from services.statistics import run_statistics
+
 
 
 app = FastAPI(
@@ -66,9 +69,36 @@ def fetch_and_cache_data(local_type: str, local_code: str, grouping: str):
     Fetches and caches the raw fire data for a specific territory based on type, code, and grouping.
     All data fetching, caching, and error handling are managed by a dedicated service function.
     """
-    return get_raw_fire_data_with_cache(local_type, local_code, grouping)
+    return get_raw_fire_data_of_cache(local_type, local_code, grouping)
+
+
+
+@app.get("/data/all/statistics/calculation/month/{local_type}/{local_code}/{grouping}", tags=["Data calculation"], response_model=CachedData)
+def calculation_for_month(local_type: str, local_code: str, grouping: str):
+    """
+    Triggers the statistical analysis for monthly fire data for a specific territory.
+    The `run_statistics` service function processes the data and stores the results.
+    """
+    run_statistics(local_type, local_code, grouping, "monthly")  
+
+    return None
+
+@app.get("/data/all/statistics/calculation/year/{local_type}/{local_code}/{grouping}", tags=["Data calculation"], response_model=CachedData)
+def calculation_for_yaer(local_type: str, local_code: str, grouping: str):
+    """
+    Triggers the statistical analysis for annual fire data for a specific territory.
+    This endpoint is crucial for generating yearly reports and long-term trends.
+    """
+    run_statistics(local_type, local_code, grouping, "annual")  
+
+    return None
+
 
 @app.get("/data/all/statistics/{local_type}/{local_code}/{grouping}", tags=["Data Retrieval"], response_model=CachedData)
 def show_all_information_from_cache(local_type: str, local_code: str, grouping: str):
-    
+    '''
+    Retrieves the cached data, including raw information and statistical calculations.
+    This allows users to access processed data without re-running calculations.
+    '''
     return get_all_fire_data_from_cache(local_type, local_code, grouping)
+

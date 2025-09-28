@@ -1,22 +1,26 @@
 # statistics.py
 from concurrent.futures import ProcessPoolExecutor
-from math.basic_data import basic_stats
-from math.descriptive_stats import (
+from statistics_math.basic_data import basic_stats
+from data.cache_manager import (
+    get_raw_data_from_cache)
+from statistics_math.descriptive_stats import (
     calculate_coefficient_of_variation,
     detect_anomalies,
     calculate_concentration_index,
     calculate_large_event_proportion,
     count_events_by_size_bin)
-from math.time_series_analysis import (
+from statistics_math.time_series_analysis import (
     calculate_yearly_growth_rate,
     calculate_linear_trend,
     calculate_seasonal_index,
     calculate_rolling_mean,
     compare_to_historical_average)
 
-def run_statistics(local_type: str, local_code: str, grouping: str, mode: str):
+def run_statistics(local_type: str, local_code: str, grouping: str, interval: str):
     # Step 1. Run the main function to generate basic data
-    basic_stats(local_type, local_code, grouping, mode)
+    cached_data = get_raw_data_from_cache(local_type, local_code, grouping)
+    if cached_data:
+        basic_stats(local_type, local_code, grouping, interval)
 
     # Step 2. List of additional functions (expandable over time)
     functions = [
@@ -35,7 +39,7 @@ def run_statistics(local_type: str, local_code: str, grouping: str, mode: str):
     # Step 3. Run additional functions in parallel using multiple processes
     with ProcessPoolExecutor(max_workers=4) as executor:
         for func in functions:
-            executor.submit(func, local_type, local_code, grouping, mode)
+            executor.submit(func, local_type, local_code, grouping, interval)
 
 
 '''
